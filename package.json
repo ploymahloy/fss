@@ -1,10 +1,10 @@
 {
-  "name": "fss",
+  "name": "fss-compiler",
   "version": "1.0.0",
   "description": "cascadeless stylesheets",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "vitest"
   },
   "keywords": [],
   "author": "",
