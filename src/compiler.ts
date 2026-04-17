@@ -1,5 +1,5 @@
-import postcss from 'postcss';
 import { validateFSS } from './validator.js';
+import { processVariables } from './preprocessor.js';
 
 const SANE_RESET = `
 :host {
@@ -16,12 +16,12 @@ const SANE_RESET = `
 `.trim();
 
 export async function compileFSS(css: string): Promise<string> {
-	// Step 1: Validate
+	// Validate
 	await validateFSS(css);
 
-	// Step 2: Transform
-	const result = await postcss([]).process(css, { from: undefined });
+	// Process Variables
+	const transformedCss = await processVariables(css);
 
 	// Step 3: Return reset/flat CSS
-	return `${SANE_RESET}\n\n${result.css}`;
+	return `${SANE_RESET}\n\n${transformedCss}`;
 }
