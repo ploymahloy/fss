@@ -11,12 +11,11 @@ export async function processVariables(css: string): Promise<string> {
 
 	if (match) {
 		const rawVars = match[1];
-		rawVars?.split(';').forEach(pair => {
+		for (const pair of rawVars?.split(';') ?? []) {
 			const [key, value] = pair.split(':').map(s => s.trim());
-			if (key && value && key.startsWith('$')) {
-				variables[key] = value;
-			}
-		});
+			if (!key || !value || !key.startsWith('$')) continue;
+			variables[key] = value;
+		}
 	}
 
 	// Remove the @define block from the CSS
@@ -29,16 +28,16 @@ export async function processVariables(css: string): Promise<string> {
 			Declaration(decl) {
 				decl.value = valueParser(decl.value)
 					.walk(node => {
-						if (node.type === 'word' && node.value.startsWith('$')) {
-							const replacement = variables[node.value];
-							if (replacement !== undefined) {
-								usedVariables.add(node.value);
-								node.value = replacement;
-							} else {
-								// Variable used but not defined
-								throw decl.error(`Variable ${node.value} is not defined in @define`, { word: node.value });
-							}
+						if (node.type !== 'word' || !node.value.startsWith('$')) return;
+
+						const replacement = variables[node.value];
+						if (replacement === undefined) {
+							// Variable used but not defined
+							throw decl.error(`Variable ${node.value} is not defined in @define`, { word: node.value });
 						}
+
+						usedVariables.add(node.value);
+						node.value = replacement;
 					})
 					.toString();
 			}
@@ -49,11 +48,11 @@ export async function processVariables(css: string): Promise<string> {
 
 	const unusedVariables = Object.keys(variables).filter(variable => !usedVariables.has(variable));
 	if (unusedVariables.length > 0) {
-		if (unusedVariables.length === 1) {
-			throw new Error(`Variable ${unusedVariables[0]} is not used`);
-		}
-
-		throw new Error(`Variables ${unusedVariables.join(', ')} are not used`);
+		const message =
+			unusedVariables.length === 1 ?
+				`Variable ${unusedVariables[0]} is not used`
+			:	`Variables ${unusedVariables.join(', ')} are not used`;
+		throw new Error(message);
 	}
 
 	return result.css;
