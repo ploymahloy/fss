@@ -1,6 +1,7 @@
 import postcss from 'postcss';
 import valueParser from 'postcss-value-parser';
 
+// Tested in tests/compiler.test.ts
 export async function processVariables(css: string): Promise<string> {
 	const variables: Record<string, string> = {};
 	const usedVariables = new Set<string>();
@@ -18,8 +19,7 @@ export async function processVariables(css: string): Promise<string> {
 		}
 	}
 
-	// Remove the @define block from the CSS
-	const cleanCss = css.replace(defineRegex, '');
+	const defineKeywordRemoved = css.replace(defineRegex, '');
 
 	// Replace variables in the remaining CSS
 	const processor = postcss([
@@ -44,7 +44,7 @@ export async function processVariables(css: string): Promise<string> {
 		}
 	]);
 
-	const result = await processor.process(cleanCss, { from: undefined });
+	const result = await processor.process(defineKeywordRemoved, { from: undefined });
 
 	const unusedVariables = Object.keys(variables).filter(variable => !usedVariables.has(variable));
 	if (unusedVariables.length > 0) {
