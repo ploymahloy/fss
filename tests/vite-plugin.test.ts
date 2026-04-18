@@ -6,13 +6,22 @@ vi.mock('../src/compiler.js', () => ({
 	compileFSS: vi.fn((input: string) => Promise.resolve(`.btn { color: ${input}; }`))
 }));
 
+const TEST_RUNTIME_IMPORT = new URL('../src/index.ts', import.meta.url).href;
+
 async function importGeneratedModule(code: string) {
-	const url = `data:text/javascript;charset=utf-8,${encodeURIComponent(code)}`;
+	const stripped = code.replace(/^import \{ createFssShadowStyles \} from [^;]+;\s*\n/m, '');
+	const wrapped = [
+		`function createFssShadowStyles(css) {`,
+		`	return { adopt() {}, update(_next) {} };`,
+		`}`,
+		stripped
+	].join('\n');
+	const url = `data:text/javascript;charset=utf-8,${encodeURIComponent(wrapped)}`;
 	return import(url);
 }
 
 describe('vite-plugin-fss', () => {
-	const plugin = fssPlugin();
+	const plugin = fssPlugin({ runtimeImport: TEST_RUNTIME_IMPORT });
 
 	beforeEach(() => {
 		vi.mocked(compileFSS).mockImplementation((input: string) => Promise.resolve(`.btn { color: ${input}; }`));
@@ -37,8 +46,11 @@ describe('vite-plugin-fss', () => {
 			expect(result).toHaveProperty('code');
 			expect(result.map).toEqual({ mappings: '' });
 
-			const expectedDefault = JSON.stringify(`.btn { color: ${fssContent}; }`);
-			expect(result.code.startsWith(`export default ${expectedDefault};`)).toBe(true);
+			const compiledMock = `.btn { color: ${fssContent}; }`;
+			expect(result.code).toContain(`import { createFssShadowStyles } from ${JSON.stringify(TEST_RUNTIME_IMPORT)}`);
+			expect(result.code).toContain(`const compiledCss = ${JSON.stringify(compiledMock)};`);
+			expect(result.code).toContain('export default compiledCss');
+			expect(result.code).not.toContain(':host *');
 		});
 
 		it('should stringify CSS with quotes, backslashes, and newlines for a valid export', async () => {
@@ -51,8 +63,8 @@ describe('vite-plugin-fss', () => {
 				return;
 			}
 
-			const expectedLine = `export default ${JSON.stringify(compiledCss)};`;
-			expect(result.code.startsWith(expectedLine)).toBe(true);
+			expect(result.code).toContain(`const compiledCss = ${JSON.stringify(compiledCss)};`);
+			expect(result.code).toContain('export default compiledCss');
 		});
 
 		it('should produce ESM that dynamic-imports without syntax errors', async () => {
@@ -67,11 +79,14 @@ describe('vite-plugin-fss', () => {
 
 			const mod = await importGeneratedModule(result.code);
 			expect(mod.default).toBe(compiledCss);
+			expect(mod.fssStyles).toBeDefined();
+			expect(typeof mod.fssStyles.adopt).toBe('function');
+			expect(typeof mod.fssStyles.update).toBe('function');
 		});
 	});
 
 	describe('HMR lifecycle', () => {
-		it('should register import.meta.hot and accept callback for DOM updates', async () => {
+		it('should persist handle on hot.data and update on accept', async () => {
 			const result = await plugin.compile('red', 'test.fss');
 			expect(result).not.toBeNull();
 			if (result === null) {
@@ -82,8 +97,10 @@ describe('vite-plugin-fss', () => {
 			expect(code).toContain('if (import.meta.hot)');
 			expect(code).toContain('import.meta.hot.accept');
 			expect(code).toContain('import.meta.hot.accept((newModule) => {');
-			expect(code).toContain('if (newModule) {');
-			expect(code).toContain('// HMR logic will be implemented here for DOM updates');
+			expect(code).toContain('import.meta.hot.data ??=');
+			expect(code).toContain('import.meta.hot.data.fssStyles ??=');
+			expect(code).toContain('fssStyles.update(newModule.default)');
+			expect(code).toContain('newModule?.default !== undefined');
 		});
 	});
 
@@ -116,6 +133,18 @@ describe('vite-plugin-fss', () => {
 			const fromCompile = await plugin.compile.call(plugin, 'src', 'widget.fss');
 
 			expect(fromTransform).toEqual(fromCompile);
+		});
+	});
+
+	describe('defaults', () => {
+		it('uses fss-compiler as runtimeImport when omitted', async () => {
+			const plain = fssPlugin();
+			const result = await plain.compile.call({}, 'x', 'a.fss');
+			expect(result).not.toBeNull();
+			if (result === null) {
+				return;
+			}
+			expect(result.code).toContain('from "fss-compiler"');
 		});
 	});
 });

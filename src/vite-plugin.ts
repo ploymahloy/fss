@@ -5,7 +5,37 @@ interface FssTransformResult {
 	map: { mappings: string };
 }
 
-export default function fssPlugin() {
+export type FssPluginOptions = {
+	runtimeImport?: string;
+};
+
+function buildFssModuleCode(compiledCss: string, runtimeImport: string): string {
+	const from = JSON.stringify(runtimeImport);
+	return [
+		`import { createFssShadowStyles } from ${from};`,
+		`const compiledCss = ${JSON.stringify(compiledCss)};`,
+		`let fssStyles;`,
+		`if (import.meta.hot) {`,
+		`  import.meta.hot.data ??= {};`,
+		`  fssStyles = import.meta.hot.data.fssStyles ??= createFssShadowStyles(compiledCss);`,
+		`} else {`,
+		`  fssStyles = createFssShadowStyles(compiledCss);`,
+		`}`,
+		`export default compiledCss;`,
+		`export { fssStyles };`,
+		`if (import.meta.hot) {`,
+		`  import.meta.hot.accept((newModule) => {`,
+		`    if (newModule?.default !== undefined) {`,
+		`      fssStyles.update(newModule.default);`,
+		`    }`,
+		`  });`,
+		`}`
+	].join('\n');
+}
+
+export default function fssPlugin(options: FssPluginOptions = {}) {
+	const runtimeImport = options.runtimeImport ?? 'fss-compiler';
+
 	return {
 		name: 'vite-plugin-fss',
 		async compile(this: any, code: string, id: string): Promise<FssTransformResult | null> {
@@ -15,16 +45,7 @@ export default function fssPlugin() {
 
 			try {
 				const compiledCss: string = await compileFSS(code);
-				const jsCode: string = [
-					`export default ${JSON.stringify(compiledCss)};`,
-					`if (import.meta.hot) {`,
-					`  import.meta.hot.accept((newModule) => {`,
-					`    if (newModule) {`,
-					`      // HMR logic will be implemented here for DOM updates`,
-					`    }`,
-					`  });`,
-					`}`
-				].join('\n');
+				const jsCode: string = buildFssModuleCode(compiledCss, runtimeImport);
 
 				return {
 					code: jsCode,
