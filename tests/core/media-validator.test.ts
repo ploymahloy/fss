@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { compileFSS } from '../src/compiler.js';
+import { compileFSS } from '../../src/core/compiler.js';
 
 describe('@media in .fss', () => {
 	it('allows @media wrapping flat class selectors', async () => {

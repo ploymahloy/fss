@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { validateFSS } from '../src/validator.js';
+import { validateFSS } from '../../src/core/validator.js';
 
 describe('FSS Validator (No-Cascade Policy)', () => {
 	it('should allow single class selectors', async () => {

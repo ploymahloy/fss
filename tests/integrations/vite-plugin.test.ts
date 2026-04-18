@@ -1,12 +1,12 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { compileFSS } from '../src/compiler.js';
-import fssPlugin from '../src/vite-plugin.js';
+import { compileFSS } from '../../src/core/compiler.js';
+import fssPlugin from '../../src/integrations/vite-plugin.js';
 
-vi.mock('../src/compiler.js', () => ({
+vi.mock('../../src/core/compiler.js', () => ({
 	compileFSS: vi.fn((input: string) => Promise.resolve(`.btn { color: ${input}; }`))
 }));
 
-const TEST_RUNTIME_IMPORT = new URL('../src/index.ts', import.meta.url).href;
+const TEST_RUNTIME_IMPORT = new URL('../../src/index.ts', import.meta.url).href;
 
 async function importGeneratedModule(code: string) {
 	const stripped = code.replace(/^import \{ createFssShadowStyles \} from [^;]+;\s*\n/m, '');

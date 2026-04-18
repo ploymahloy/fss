@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
 import fs from 'node:fs/promises';
-import { generateTypes } from '../src/type-generator.js';
+import { generateTypes } from '../../src/integrations/type-generator.js';
 
 vi.mock('node:fs/promises');
 

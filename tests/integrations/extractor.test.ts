@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { extractClasses } from '../src/extractor.js';
+import { extractClasses } from '../../src/integrations/extractor.js';
 
 describe('FSS Class Extractor', () => {
 	it('should extract simple class names', () => {

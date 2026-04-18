@@ -1,8 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import chokidar, { type FSWatcher } from 'chokidar';
 import fs from 'node:fs/promises';
-import { watch } from '../src/watch.js';
-import * as typeGen from '../src/type-generator.js';
+import { watch } from '../../src/integrations/watch.js';
+import * as typeGen from '../../src/integrations/type-generator.js';
 
 vi.mock('chokidar');
 vi.mock('node:fs/promises');

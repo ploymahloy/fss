@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { compileFSS } from '../src/compiler.js';
-import { FSS_BASE_CSS } from '../src/base-css.js';
+import { compileFSS } from '../../src/core/compiler.js';
+import { FSS_BASE_CSS } from '../../src/runtime/base-css.js';
 
 describe('FSS Compiler', () => {
 	it('should return component CSS only (reset lives in FSS_BASE_CSS)', async () => {

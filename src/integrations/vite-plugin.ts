@@ -1,4 +1,4 @@
-import { compileFSS } from './compiler.js';
+import { compileFSS } from '../core/compiler.js';
 
 interface FssTransformResult {
 	code: string;

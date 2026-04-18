@@ -1,7 +1,6 @@
 import postcss from 'postcss';
 import valueParser from 'postcss-value-parser';
 
-// Tested in tests/compiler.test.ts
 export async function processVariables(css: string): Promise<string> {
 	const variables: Record<string, string> = {};
 	const usedVariables = new Set<string>();
@@ -21,7 +20,6 @@ export async function processVariables(css: string): Promise<string> {
 
 	const defineKeywordRemoved = css.replace(defineRegex, '');
 
-	// Replace variables in the remaining CSS
 	const processor = postcss([
 		{
 			postcssPlugin: 'fss-variables',
@@ -31,8 +29,8 @@ export async function processVariables(css: string): Promise<string> {
 						if (node.type !== 'word' || !node.value.startsWith('$')) return;
 
 						const replacement = variables[node.value];
+						// Check for undefined variables
 						if (replacement === undefined) {
-							// Variable used but not defined
 							throw decl.error(`Variable ${node.value} is not defined in @define`, { word: node.value });
 						}
 
@@ -46,6 +44,7 @@ export async function processVariables(css: string): Promise<string> {
 
 	const result = await processor.process(defineKeywordRemoved, { from: undefined });
 
+	// Check for unused variables
 	const unusedVariables = Object.keys(variables).filter(variable => !usedVariables.has(variable));
 	if (unusedVariables.length > 0) {
 		const message =

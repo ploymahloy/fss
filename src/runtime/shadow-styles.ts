@@ -1,4 +1,4 @@
-import { FSS_BASE_CSS } from '../base-css.js';
+import { FSS_BASE_CSS } from './base-css.js';
 
 let baseStyleSheet: CSSStyleSheet | null = null;
 

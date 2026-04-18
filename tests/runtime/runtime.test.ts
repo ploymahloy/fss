@@ -4,7 +4,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 
 async function loadRuntime() {
-	return import('../src/runtime/shadow-styles.js');
+	return import('../../src/runtime/shadow-styles.js');
 }
 
 describe('createFssShadowStyles runtime', () => {
