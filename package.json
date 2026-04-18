@@ -4,7 +4,8 @@
   "description": "cascadeless stylesheets",
   "main": "index.js",
   "scripts": {
-    "test": "vitest"
+    "test": "vitest",
+    "examples:dev": "npm run dev --prefix examples/basic"
   },
   "keywords": [],
   "author": "",
