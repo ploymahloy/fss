@@ -22,6 +22,6 @@ export async function compileFSS(css: string): Promise<string> {
 	// Process Variables
 	const transformedCss = await processVariables(css);
 
-	// Step 3: Return reset/flat CSS
+	// Return reset/flat CSS
 	return `${SANE_RESET}\n\n${transformedCss}`;
 }
