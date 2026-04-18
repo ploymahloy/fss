@@ -1,14 +1,17 @@
 import { describe, it, expect } from 'vitest';
 import { compileFSS } from '../src/compiler.js';
+import { FSS_BASE_CSS } from '../src/base-css.js';
 
 describe('FSS Compiler', () => {
-	it('should prepend the global host reset', async () => {
+	it('should return component CSS only (reset lives in FSS_BASE_CSS)', async () => {
 		const input = '.btn { color: red; }';
 		const output = await compileFSS(input);
 
-		expect(output).toContain(':host * {');
-		expect(output).toContain('all: unset');
-		expect(output).toContain('.btn { color: red; }');
+		expect(output).toBe('.btn { color: red; }');
+		expect(output).not.toContain(':host *');
+
+		expect(FSS_BASE_CSS).toContain(':host * {');
+		expect(FSS_BASE_CSS).toContain('all: unset');
 	});
 
 	it('should still fail on illegal selectors during compilation', async () => {
