@@ -1,0 +1,20 @@
+{
+	"iconDefinitions": {
+		"_fss_file": {
+			"iconPath": "../icons/fss.svg"
+		}
+	},
+	"fileExtensions": {
+		"fss": "_fss_file"
+	},
+	"light": {
+		"fileExtensions": {
+			"fss": "_fss_file"
+		}
+	},
+	"highContrast": {
+		"fileExtensions": {
+			"fss": "_fss_file"
+		}
+	}
+}

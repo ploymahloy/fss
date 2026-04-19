@@ -5,7 +5,9 @@
   "main": "index.js",
   "scripts": {
     "test": "vitest",
-    "examples:dev": "npm run dev --prefix examples/basic"
+    "examples:dev": "npm run dev --prefix examples/basic",
+    "editor:build": "npm run build --prefix editor/fss-language-server && npm run compile --prefix editor/vscode-fss",
+    "editor:package": "npm run editor:build && npm run vsix --prefix editor/vscode-fss"
   },
   "keywords": [],
   "author": "",
@@ -24,6 +26,8 @@
     "@types/node": "^25.6.0",
     "happy-dom": "^17.6.3",
     "typescript": "^6.0.3",
-    "vitest": "^4.1.4"
+    "vitest": "^4.1.4",
+    "vscode-languageserver": "^9.0.1",
+    "vscode-languageserver-textdocument": "^1.0.12"
   }
 }
