@@ -1,4 +1,5 @@
 {
+	"extends": "vs-seti",
 	"iconDefinitions": {
 		"_fss_file": {
 			"iconPath": "../icons/fss.svg"
