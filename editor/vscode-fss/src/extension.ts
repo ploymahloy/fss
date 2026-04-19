@@ -16,12 +16,12 @@ export function activate(context: vscode.ExtensionContext): void {
 		run: {
 			command: process.execPath,
 			args: [serverModule],
-			transport: TransportKind.ipc
+			transport: TransportKind.stdio
 		},
 		debug: {
 			command: process.execPath,
 			args: [serverModule],
-			transport: TransportKind.ipc
+			transport: TransportKind.stdio
 		}
 	};
 
